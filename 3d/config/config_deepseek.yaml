@@ -1,0 +1,19 @@
+llm:
+  type: deepseek
+  models:
+    deepseek: "deepseek-chat"
+    openrouter: Null
+    openai: Null
+    anthropic: Null
+  api_keys:
+    deepseek: "your-api-key"
+    openrouter: ""
+    openai: ""
+    anthropic: ""
+  temperature: 0.7
+
+benchmark:
+  checkpoint: "checkpoints"
+  verbose: true
+  output_pattern: "results/{dataset_name}_{model}.json"
+

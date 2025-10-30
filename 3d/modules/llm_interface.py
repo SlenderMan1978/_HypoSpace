@@ -392,6 +392,124 @@ class AnthropicLLM(LLMInterface):
         return pricing_map.get(self.model, {'input': 3.0, 'output': 15.0})
 
 
+class DeepSeekLLM(LLMInterface):
+    """
+    DeepSeek API interface.
+
+    DeepSeek uses an OpenAI-compatible API.
+    """
+
+    def __init__(
+        self,
+        model: str = "deepseek-chat",
+        api_key: Optional[str] = None,
+        temperature: float = 0.7,
+        max_tokens: int = 8192,
+        base_url: str = "https://api.deepseek.com/v1"
+    ):
+        """
+        Initialize DeepSeek LLM interface.
+
+        Args:
+            model: DeepSeek model to use (e.g., "deepseek-chat", "deepseek-reasoner")
+            api_key: DeepSeek API key
+            temperature: Sampling temperature
+            max_tokens: Maximum tokens in response
+            base_url: DeepSeek API base URL
+        """
+        if not api_key:
+            raise ValueError("DeepSeek API key is required")
+
+        self.model = model
+        self.api_key = api_key
+        self.temperature = temperature
+        self.max_tokens = max_tokens
+        self.base_url = base_url
+        self.headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json"
+        }
+
+    def query(self, prompt: str) -> str:
+        """Query DeepSeek API."""
+        result = self.query_with_usage(prompt)
+        return result['response']
+
+    def query_with_usage(self, prompt: str) -> Dict[str, Any]:
+        """Query DeepSeek API with usage tracking."""
+        try:
+            url = f"{self.base_url}/chat/completions"
+            payload = {
+                "model": self.model,
+                "messages": [
+                    {"role": "system", "content": "You are an expert in spatial reasoning and 3D reconstruction."},
+                    {"role": "user", "content": prompt}
+                ],
+                "temperature": self.temperature,
+                "max_tokens": self.max_tokens
+            }
+
+            response = requests.post(url, headers=self.headers, json=payload, timeout=120)
+            response.raise_for_status()
+            result = response.json()
+
+            # Extract usage information
+            usage = result.get('usage', {})
+            usage_data = {
+                'prompt_tokens': usage.get('prompt_tokens', 0),
+                'completion_tokens': usage.get('completion_tokens', 0),
+                'total_tokens': usage.get('total_tokens', 0)
+            }
+
+            # Calculate cost based on model pricing
+            pricing = self.get_model_pricing()
+            cost = (usage_data['prompt_tokens'] * pricing['input'] +
+                   usage_data['completion_tokens'] * pricing['output']) / 1_000_000
+
+            return {
+                'response': result['choices'][0]['message']['content'],
+                'usage': usage_data,
+                'cost': cost
+            }
+
+        except requests.exceptions.RequestException as e:
+            error_msg = f"Error querying DeepSeek: {str(e)}"
+            try:
+                # Try to get more details from response
+                if hasattr(e, 'response') and e.response is not None:
+                    try:
+                        error_detail = e.response.json()
+                        error_msg += f"\nDetails: {error_detail}"
+                    except:
+                        error_msg += f"\nResponse text: {e.response.text[:200]}"
+            except:
+                pass
+            return {
+                'response': error_msg,
+                'usage': {'prompt_tokens': 0, 'completion_tokens': 0, 'total_tokens': 0},
+                'cost': 0.0
+            }
+        except (KeyError, IndexError) as e:
+            return {
+                'response': f"Error parsing DeepSeek response: {str(e)}",
+                'usage': {'prompt_tokens': 0, 'completion_tokens': 0, 'total_tokens': 0},
+                'cost': 0.0
+            }
+
+    def get_name(self) -> str:
+        """Get the model name."""
+        return f"DeepSeek({self.model})"
+
+    def get_model_pricing(self) -> Dict[str, float]:
+        """Get pricing per 1M tokens for DeepSeek models."""
+        # Pricing in dollars per 1M tokens
+        pricing_map = {
+            'deepseek-chat': {'input': 0.14, 'output': 0.28},
+            'deepseek-reasoner': {'input': 0.55, 'output': 2.19},
+        }
+        return pricing_map.get(self.model, {'input': 0.14, 'output': 0.28})
+
+
 class ResponseParser:
     """Parser for extracting causal graphs from LLM responses."""
     

@@ -1,0 +1,7 @@
+numpy
+networkx
+requests
+matplotlib
+seaborn
+PyYAML
+scipy

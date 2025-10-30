@@ -15,7 +15,7 @@ import traceback
 # Add parent directory to path if needed
 sys.path.append(str(Path(__file__).parent))
 
-from modules.llm_interface import LLMInterface, OpenRouterLLM, OpenAILLM, AnthropicLLM
+from modules.llm_interface import LLMInterface, OpenRouterLLM, OpenAILLM, AnthropicLLM, DeepSeekLLM
 
 
 class Structure3D:
@@ -1024,6 +1024,17 @@ def setup_llm(llm_type: str, **kwargs) -> LLMInterface:
             temperature=kwargs.get('temperature', 0.7)
         )
     
+    elif llm_type == "deepseek":
+        api_key = kwargs.get('api_key') or os.environ.get('DEEPSEEK_API_KEY')
+        if not api_key:
+            raise ValueError("DeepSeek API key required")
+
+        return DeepSeekLLM(
+            model=kwargs.get('model', 'deepseek-chat'),
+            api_key=api_key,
+            temperature=kwargs.get('temperature', 0.7)
+        )
+
     else:
         raise ValueError(f"Unknown LLM type: {llm_type}")
 
@@ -1072,7 +1083,8 @@ def main():
         default_models = {
             'openrouter': 'openai/gpt-3.5-turbo',
             'openai': 'gpt-4',
-            'anthropic': 'claude-3-opus-20240229'
+            'anthropic': 'claude-3-opus-20240229',
+            'deepseek': 'deepseek-chat'
         }
         model = default_models.get(llm_type)
     
@@ -1081,7 +1093,8 @@ def main():
         env_vars = {
             'openai': 'OPENAI_API_KEY',
             'anthropic': 'ANTHROPIC_API_KEY',
-            'openrouter': 'OPENROUTER_API_KEY'
+            'openrouter': 'OPENROUTER_API_KEY',
+            'deepseek': 'DEEPSEEK_API_KEY'
         }
         if llm_type in env_vars:
             api_key = os.environ.get(env_vars[llm_type])
