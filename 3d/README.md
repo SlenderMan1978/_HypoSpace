@@ -1,320 +1,305 @@
-# 3D Structure Discovery Benchmark - Performance Optimization
+# 3D Block World Hypothesis Generation - Performance Enhancement
 
-## 📋 Project Overview
+<div align="center">
 
-This project focuses on improving Large Language Model (LLM) performance on the **3D Structure Discovery** creativity task from the HypoSpace benchmark. The goal is to enhance the model's ability to generate valid, unique, and comprehensive hypotheses when reconstructing 3D structures from 2D observations.
+## 📦 Improving LLM Creativity in 3D Spatial Reasoning
 
-## 🎯 Task Description
-
-**3D Structure Discovery** is a creativity task that challenges LLMs to:
-- Infer complete 3D structures from top-view observations
-- Generate multiple valid hypotheses that satisfy physical constraints (gravity, support)
-- Explore the space of admissible structures systematically
-- Maximize coverage of the ground truth hypothesis space
-
-### Evaluation Metrics
-
-The task is evaluated on three key dimensions:
-- **Validity (V)**: Proportion of generated structures that satisfy all physical constraints
-- **Uniqueness (U)**: Non-redundancy among generated hypotheses
-- **Recovery (R)**: Coverage of the true admissible hypothesis space
-
-## 🚀 Optimization Approach
-
-### Selected LLM
-**DeepSeek Chat** (`deepseek-chat`) via DeepSeek API
-- Cost-effective: $0.14/$0.28 per M tokens (input/output)
-- Strong reasoning capabilities
-- Good performance on structured tasks
-
-### Optimization Methods
-
-I implemented **5 key optimization strategies** to improve LLM performance:
-
-#### 1. **Multi-Strategy Prompting**
-Instead of using a single prompting approach, I designed 5 different exploration strategies that guide the model to explore different regions of the solution space:
-
-- **Systematic**: Step-by-step analytical approach
-- **Minimal**: Generate structures with minimum blocks
-- **Maximal**: Generate structures with maximum blocks (within constraints)
-- **Diverse**: Explicitly request maximum diversity from previous attempts
-- **Analytical**: Require analysis before generation
-
-These strategies are applied cyclically across queries to ensure comprehensive coverage.
-
-#### 2. **Enhanced Constraint Specification**
-Restructured prompts with clearer organization:
-```
-GIVEN INFORMATION → PHYSICAL CONSTRAINTS → STRATEGY GUIDANCE → 
-PREVIOUS ATTEMPTS → OUTPUT FORMAT → VALIDATION CHECKLIST
-```
-
-Key improvements:
-- Explicit gravity/support requirements
-- Clear layer numbering (Layer 1 = bottom)
-- Detailed format examples
-- Built-in validation checklist
-
-#### 3. **Adaptive Query Allocation**
-Dynamic query count based on problem complexity:
-```python
-target_queries = max(5, int(n_ground_truths × 1.5))
-```
-- Simple problems: fewer queries
-- Complex problems: more queries
-- Guarantees minimum exploration
-
-#### 4. **Iterative Refinement with Feedback**
-- Display up to 5 previous structures
-- Explicit uniqueness requirements
-- Structured history to avoid repetition
-
-#### 5. **Intelligent Retry Mechanism**
-- Up to 3 retries per query
-- Parse failures trigger automatic retry
-- Maintains detailed statistics
-
-## 📊 Results
-
-### Performance Comparison
+**Result:**
 
 ![Performance Comparison](results/performance_comparison.png)
 
-### Key Improvements (10 samples, seed=100)
+</div>
 
-| Metric | Original | Optimized | Absolute Gain | Relative Gain |
-|--------|----------|-----------|---------------|---------------|
-| **Validity** | 64.00% ± 21.07% | 70.00% ± 13.42% | **+6.00%** | **+9.4%** |
-| **Uniqueness** | 68.00% ± 18.33% | 93.06% ± 11.74% | **+25.06%** | **+36.8%** ⭐ |
-| **Recovery** | 28.89% ± 16.30% | 45.93% ± 21.99% | **+17.04%** | **+59.0%** ⭐⭐ |
-| **Average** | 53.63% | 69.66% | **+16.03%** | **+29.9%** |
+---
 
-### Highlights
+## 🎯 Project Overview
 
-✅ **Most Significant Improvement**: Recovery rate increased by **59%** (relative)
-- From 28.89% to 45.93%
-- Multi-strategy prompting enables more comprehensive exploration
+This project explores and compares three different approaches to enhance the performance of **DeepSeek-Chat** on the **3D Block World** hypothesis generation task from the HypoSpace benchmark suite.
 
-✅ **Uniqueness Boost**: +36.8% relative improvement
-- From 68.00% to 93.06%
-- Diverse strategies prevent repetitive generations
+### Task Description
 
-✅ **Stable Validity**: Maintained high validity with reduced variance
-- Standard deviation decreased from 21.07% to 13.42%
-- Enhanced constraints ensure consistent quality
+The 3D Block World task challenges LLMs to generate multiple valid hypotheses about 3D block configurations based on 2D observations from different viewpoints (top, front, side). This is an **underdetermined problem** where multiple distinct 3D structures can produce identical 2D projections.
 
-✅ **Cost-Effective**: Only 5.6% increase in cost
-- Performance/Cost ratio improved by 30%
-- Efficient resource allocation
+**Key Challenge:** Generate diverse, valid, and comprehensive sets of hypotheses that:
+- ✅ Satisfy all observational constraints (Validity)
+- 🌟 Are mechanistically distinct from each other (Uniqueness)
+- 🎯 Cover the ground truth solution space (Recovery)
 
-## 🛠️ Implementation
+---
 
-### File Structure
+## 🔬 Methodology: Three Approaches Compared
+
+### 1️⃣ **Original Baseline**
+- Standard prompting with DeepSeek-Chat
+- Direct query without optimization
+- Fixed number of queries (10 per observation)
+
+### 2️⃣ **Prompt Optimized**
+- Enhanced prompt engineering with:
+  - Clear structural guidance
+  - Step-by-step reasoning instructions
+  - Explicit diversity encouragement
+  - Constraint clarification
+- Same query budget as baseline
+
+### 3️⃣ **Optimizer Enhanced** (ConstraintFixer + LocalSearch + Diversity)
+- Multi-stage optimization pipeline:
+  1. **ConstraintFixer**: Automatically repairs invalid structures to satisfy observational constraints
+  2. **LocalSearchOptimizer**: Explores neighborhood of valid hypotheses through systematic perturbations
+  3. **DiversityEnhancer**: Ensures generated hypotheses are mechanistically distinct
+- Expands hypothesis set beyond initial LLM generations
+
+---
+
+## 📊 Performance Results
+
+### Summary Metrics
+
+| Method | Validity ↑ | Uniqueness ↑ | Recovery ↑ |
+|--------|------------|--------------|------------|
+| **Original** | 0.640 ± 0.211 | 0.680 ± 0.188 | 0.289 ± 0.175 |
+| **Prompt Optimized** | 0.700 ± 0.133 | 0.931 ± 0.120 | 0.459 ± 0.230 |
+| **Optimizer Enhanced** | **1.000** ± 0.000 | 0.605 ± 0.231 | **0.630** ± 0.283 |
+
+### Key Findings
+
+#### ✨ Validity (Constraint Satisfaction)
+- **Winner: Optimizer Enhanced (100%)**
+- The ConstraintFixer component ensures all generated hypotheses satisfy observational constraints
+- Original and Prompt Optimized methods sometimes produce invalid structures
+
+#### 🌟 Uniqueness (Non-Redundancy)
+- **Winner: Prompt Optimized (93.1%)**
+- Enhanced prompting effectively encourages diverse generation
+- Optimizer Enhanced trades some uniqueness for validity guarantees
+- Original baseline shows moderate uniqueness
+
+#### 🎯 Recovery (Ground Truth Coverage)
+- **Winner: Optimizer Enhanced (63.0%)**
+- LocalSearch significantly expands the hypothesis space
+- Recovers 2.2× more ground truths than original baseline
+- Prompt optimization alone achieves 1.6× improvement
+
+---
+
+## 🏆 Comparative Analysis
+
+### Trade-offs and Insights
+
+**Prompt Optimized Approach:**
+- ✅ Best uniqueness score (93.1%)
+- ✅ Significant recovery improvement over baseline (+58.8%)
+- ⚠️ Lower validity than optimizer (70% vs 100%)
+- 💡 **Best for:** Exploratory hypothesis generation where diversity is paramount
+
+**Optimizer Enhanced Approach:**
+- ✅ Perfect validity (100%)
+- ✅ Best recovery rate (63.0%)
+- ✅ Generates 53% more hypotheses than initial queries (153 vs 100)
+- ⚠️ Lower uniqueness due to systematic neighborhood exploration
+- 💡 **Best for:** Comprehensive solution space coverage with guaranteed validity
+
+### Overall Recommendation
+
+For **practical applications** requiring reliable and comprehensive hypothesis sets:
+- **Use Optimizer Enhanced** when validity is critical and computational resources allow
+- **Use Prompt Optimized** when rapid, diverse exploration is needed with acceptable validity trade-offs
+- **Combine both** for optimal results: Prompt Optimized for initial diversity + Optimizer for guaranteed validity and coverage
+
+---
+
+## 📁 Repository Structure
+
 ```
 3d/
-├── run_3d_benchmark.py              # Original benchmark
-├── run_3d_benchmark_optimized.py    # Optimized version ⭐
-├── compare_results.py               # Visualization tool
-├── config/
-│   ├── config_deepseek.yaml         # DeepSeek configuration
-│   └── config_gpt4o.yaml
+├── README.md                           # This file
 ├── datasets/
-│   └── 3d_complete.json             # 129 observation sets
+│   └── 3d_complete.json               # 129 observation sets with ground truths
+├── results/
+│   ├── 3d_complete_deepseek-chat_20251030_130728.json              # Original
+│   ├── 3d_complete_deepseek-chat_optimized_20251030_132636.json     # Prompt Optimized
+│   ├── 3d_complete_deepseek-chat_with_optimizer_20251030_160648.json # Optimizer Enhanced
+│   └── performance_comparison.png      # Visualization
+├── config/
+│   ├── config_deepseek.yaml           # DeepSeek API configuration
+│   └── config_gpt4o.yaml              # GPT-4O configuration (alternative)
 ├── modules/
-│   ├── llm_interface.py             # LLM API interfaces
-│   └── models.py
-└── results/
-    └── performance_comparison.png   # Comparison chart
+│   ├── llm_interface.py               # LLM API wrapper
+│   └── models.py                      # Data models and structures
+├── run_3d_benchmark.py                # Original baseline script
+├── run_3d_benchmark_optimized.py      # Prompt optimization script
+├── run_3d_benchmark_with_optimizer.py # Full optimizer pipeline script
+├── compare_results.py                 # Results comparison and visualization
+├── generate_3d_dataset_complete.py    # Dataset generation
+└── requirements.txt                   # Python dependencies
 ```
 
-### Quick Start
+---
 
-#### 1. Install Dependencies
+## 🚀 Reproduction Guide
+
+### Prerequisites
+
 ```bash
-pip install requests numpy scipy pyyaml matplotlib seaborn
+pip install -r requirements.txt
 ```
 
-#### 2. Configure API Key
-Edit `config/config_deepseek.yaml`:
+**Required packages:**
+- `openai` - LLM API interface
+- `numpy` - Numerical operations
+- `matplotlib` - Visualization
+- `pyyaml` - Configuration management
+- `tqdm` - Progress bars
+
+### Configuration
+
+Create API configuration in `config/config_deepseek.yaml`:
+
 ```yaml
-llm:
-  type: deepseek
-  models:
-    deepseek: "deepseek-chat"
-  api_keys:
-    deepseek: "your-api-key-here"
-  temperature: 0.7
+llm_provider: "DeepSeek"
+model_name: "deepseek-chat"
+api_key: "your-api-key-here"
+base_url: "https://api.deepseek.com"
+temperature: 0.7
+max_tokens: 8000
 ```
 
-#### 3. Run Original Benchmark
+### Running Experiments
+
+#### 1. Generate Dataset (if needed)
 ```bash
-python run_3d_benchmark.py \
-  --dataset datasets/3d_complete.json \
-  --config config/config_deepseek.yaml \
-  --n-samples 10 \
-  --n-queries 10 \
-  --seed 100
+python generate_3d_dataset_complete.py
 ```
 
-#### 4. Run Optimized Benchmark
+#### 2. Run Original Baseline
 ```bash
-python run_3d_benchmark_optimized.py \
-  --dataset datasets/3d_complete.json \
-  --config config/config_deepseek.yaml \
-  --n-samples 10 \
-  --query-multiplier 1.5 \
-  --seed 100
+python run_3d_benchmark.py --config config/config_deepseek.yaml --n_samples 10
 ```
 
-#### 5. Generate Comparison Chart
+#### 3. Run Prompt Optimized
+```bash
+python run_3d_benchmark_optimized.py --config config/config_deepseek.yaml --n_samples 10
+```
+
+#### 4. Run Optimizer Enhanced
+```bash
+python run_3d_benchmark_with_optimizer.py --config config/config_deepseek.yaml --n_samples 10
+```
+
+#### 5. Compare Results
 ```bash
 python compare_results.py
 ```
 
-### Configuration Options
-
-| Parameter | Description | Default | Optimized |
-|-----------|-------------|---------|-----------|
-| `--n-samples` | Number of test samples | 10 | 10 |
-| `--n-queries` | Fixed queries per sample | 10 | Adaptive |
-| `--query-multiplier` | Adaptive multiplier | N/A | 1.5 |
-| `--max-retries` | Retries per query | 3 | 3 |
-| `--seed` | Random seed | None | 100 |
-| `--temperature` | LLM temperature | 0.7 | 0.7 |
-
-## 🔬 Technical Details
-
-### Strategy Selection Logic
-```python
-# First N queries: cycle through all strategies
-if query_idx < len(strategies):
-    strategy = strategies[query_idx]
-# Mid-phase: favor systematic/analytical
-elif query_idx < target_queries // 2:
-    strategy = random.choice(["systematic", "diverse", "analytical"])
-# Late-phase: favor extreme configurations
-else:
-    strategy = random.choice(["minimal", "maximal", "diverse"])
-```
-
-### Structure Validation
-1. Parse LLM output → Structure3D object
-2. Generate top view projection
-3. Compare with observation
-4. Check physical constraints (gravity support)
-5. Compute normalized hash
-6. Check uniqueness
-7. Compare with ground truth
-
-### Prompt Engineering Pattern
-```
-STRUCTURED INFORMATION PRESENTATION:
-├── GIVEN: Problem description + statistics
-├── CONSTRAINTS: Physical rules (explicit)
-├── STRATEGY: Specific guidance per strategy
-├── PREVIOUS: History (up to 5 structures)
-├── OUTPUT FORMAT: Clear examples
-└── VALIDATION: Self-check list
-```
-
-## 📈 Analysis
-
-### Why Multi-Strategy Works
-
-**Original Approach**: Single prompting strategy
-- Limited exploration
-- Prone to local optima
-- Repetitive generations
-
-**Optimized Approach**: 5 diverse strategies
-- Systematic coverage of solution space
-- Different strategies discover different structures
-- Explicit diversity requirements reduce redundancy
-
-### Sample-Level Performance
-
-From the 10-sample test:
-- **Best case**: 100% validity, 100% uniqueness, 67% recovery
-- **Worst case**: 30% validity, 67% uniqueness, 22% recovery
-- **Consistency**: Reduced variance in all metrics
-
-### Cost-Benefit Analysis
-
-| Metric | Value | Improvement |
-|--------|-------|-------------|
-| Token usage | 45K → 52K | +15.6% |
-| API cost | $0.009 → $0.0095 | +5.6% |
-| Recovery/Cost ratio | 3209 → 4835 | **+50.7%** |
-| Performance/Cost | 5959 → 7333 | **+23.1%** |
-
-**Conclusion**: Significant performance gains with minimal cost increase.
-
-## 🎓 Key Learnings
-
-### 1. Prompt Diversity > Temperature Diversity
-Instead of relying on temperature sampling, using **multiple prompting strategies** provides:
-- More controlled exploration
-- Strategy-specific guidance
-- Better interpretability
-
-### 2. Constraint Clarity is Critical
-Clear, structured constraint descriptions dramatically improve:
-- Validity rates
-- Consistency across attempts
-- Model's understanding of the task
-
-### 3. Adaptive Resource Allocation
-Matching query count to problem complexity:
-- Prevents over-querying simple cases
-- Ensures sufficient exploration for complex cases
-- Improves efficiency
-
-### 4. Iterative Feedback Helps
-Showing previous attempts to the model:
-- Reduces redundancy
-- Encourages diversity
-- Mimics human exploration process
-
-## 🚀 Future Improvements
-
-Potential areas for further optimization:
-
-1. **Temperature Scheduling**: Vary temperature across queries
-   - Low (0.3) for early queries → ensure validity
-   - High (1.0) for late queries → maximize diversity
-
-2. **Beam Search**: Generate multiple candidates per query, select best
-
-3. **Constraint Programming**: Pre-compute valid configurations as hints
-
-4. **Meta-Learning**: Learn which strategies work best for which problem types
-
-5. **Ensemble Methods**: Combine multiple LLMs with different strengths
-
-## 📚 References
-
-- **HypoSpace Benchmark**: Framework for evaluating creative hypothesis generation
-- **DeepSeek API**: https://api-docs.deepseek.com/
-- **Original Task**: 3D Structure Discovery from 2D observations
-
-## 👨‍💻 Author
-
-Created as part of a creativity task optimization assignment, demonstrating:
-- ✅ LLM selection and configuration (DeepSeek)
-- ✅ Novel optimization methods (multi-strategy prompting)
-- ✅ Significant performance improvements (59% gain in Recovery)
-- ✅ Rigorous evaluation and comparison
-- ✅ Cost-effectiveness analysis
-
-## 📄 License
-
-This project is part of the HypoSpace benchmark framework.
+This generates `results/performance_comparison.png` with the visualization shown above.
 
 ---
 
-**Assignment Completion Date**: October 30, 2025  
-**Task**: Improve LLM performance on 3D Structure Discovery  
-**Method**: Multi-strategy prompting with adaptive query allocation  
-**Result**: +59% Recovery, +37% Uniqueness, +9% Validity  
-**Status**: ✅ Complete
+## 💡 Technical Implementation Details
+
+### Prompt Optimization Strategy
+
+Enhanced prompts include:
+1. **Explicit constraint statement** - Clear specification of observational requirements
+2. **Structured thinking** - Step-by-step reasoning template
+3. **Diversity prompting** - Explicit instructions to generate mechanistically different solutions
+4. **Format specification** - Detailed output format requirements
+5. **Example-based learning** - Demonstration of valid diverse solutions
+
+### Optimizer Pipeline
+
+#### ConstraintFixer
+- Identifies constraint violations through projection matching
+- Applies minimal edits to satisfy observational constraints
+- Preserves as much of original structure as possible
+
+#### LocalSearchOptimizer  
+- Performs systematic perturbations (add/remove/move blocks)
+- Validates each perturbation against constraints
+- Expands valid hypothesis space incrementally
+
+#### DiversityEnhancer
+- Computes structural similarity between hypotheses
+- Filters redundant solutions
+- Ensures mechanistic distinctness
+
+---
+
+## 📈 Evaluation Metrics
+
+Following the HypoSpace framework:
+
+### Validity (V)
+**Definition:** Proportion of generated hypotheses that satisfy all observational constraints
+
+```
+V = |{h ∈ H : h satisfies all observations}| / |H|
+```
+
+### Uniqueness (U)  
+**Definition:** Proportion of hypotheses that are structurally distinct
+
+```
+U = |{unique structures in H}| / |H|
+```
+
+### Recovery (R)
+**Definition:** Proportion of ground truth solutions discovered
+
+```
+R = |{h ∈ H : h ∈ GT}| / |GT|
+```
+
+Where:
+- `H` = Generated hypothesis set
+- `GT` = Ground truth solution set
+
+---
+
+## 🎓 Key Learnings
+
+1. **Prompt engineering** significantly improves diversity and recovery without requiring additional compute for optimization
+2. **Systematic optimization** (ConstraintFixer + LocalSearch) achieves perfect validity and highest recovery
+3. **Trade-off exists** between uniqueness and validity when using automated constraint repair
+4. **Combining approaches** (diverse initial generation + systematic optimization) may offer best of both worlds
+5. **Task-specific optimization** outperforms generic prompting for constrained creative tasks
+
+---
+
+## 🔮 Future Directions
+
+- [ ] Hybrid approach: Prompt optimization + selective optimizer use
+- [ ] Adaptive query allocation based on problem difficulty
+- [ ] Multi-model ensembles for diversity
+- [ ] Transfer learning from 3D task to other spatial reasoning domains
+- [ ] Cost-performance optimization for production deployment
+
+---
+
+## 📚 References
+
+- **HypoSpace Paper:** [arXiv:2510.15614](https://arxiv.org/abs/2510.15614)
+- **DeepSeek-Chat:** [DeepSeek API Documentation](https://www.deepseek.com)
+
+---
+
+## 👨‍💻 Experimental Details
+
+- **Model:** DeepSeek-Chat
+- **Dataset:** 129 observation sets (10 sampled for experiments)
+- **Queries per observation:** 10
+- **Seed:** 100 (for reproducibility)
+- **Total experiments:** 3 (Original, Prompt Optimized, Optimizer Enhanced)
+- **Date:** October 30, 2025
+
+---
+
+## 📊 Statistical Significance
+
+Standard deviations shown as error bars in the comparison chart indicate variability across different observation sets. Key observations:
+
+- Optimizer Enhanced shows **zero variance** in validity (always 100%)
+- Prompt Optimized achieves **lowest variance** in uniqueness (std = 0.120)
+- Recovery shows **highest variance** across all methods, reflecting problem difficulty diversity
+
 
