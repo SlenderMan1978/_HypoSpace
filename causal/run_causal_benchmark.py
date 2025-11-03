@@ -16,7 +16,7 @@ from scipy import stats
 import traceback
 
 from modules.models import CausalGraph
-from modules.llm_interface import LLMInterface, OpenRouterLLM, OpenAILLM, AnthropicLLM
+from modules.llm_interface import LLMInterface, OpenRouterLLM, OpenAILLM, AnthropicLLM, DeepSeekLLM
 from generate_causal_dataset import PerturbationObservation, CausalDatasetGenerator
 
 class CausalBenchmarkEnhanced:
@@ -839,7 +839,18 @@ def setup_llm(llm_type: str, **kwargs) -> LLMInterface:
             api_key=api_key,
             temperature=kwargs.get('temperature', 0.7)
         )
-    
+
+
+    elif llm_type == "deepseek":
+        api_key = kwargs.get('api_key') or os.environ.get('DEEPSEEK_API_KEY')
+        if not api_key:
+            raise ValueError("DeepSeek API key required")
+        return DeepSeekLLM(
+            model=kwargs.get('model', 'deepseek-chat'),
+            api_key=api_key,
+            temperature=kwargs.get('temperature', 0.7)
+        )
+
     else:
         raise ValueError(f"Unknown LLM type: {llm_type}")
 
