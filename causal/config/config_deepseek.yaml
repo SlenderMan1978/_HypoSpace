@@ -6,7 +6,7 @@ llm:
     openai: Null
     anthropic: Null
   api_keys:
-    deepseek: "sk-0916aed743e84584808d8828a2dd8e84"
+    deepseek: "your api here"
     openrouter: ""
     openai: ""
     anthropic: ""
